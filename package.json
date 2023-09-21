@@ -1,0 +1,52 @@
+{
+  "name": "learn-vue",
+  "private": true,
+  "packageManager": "pnpm@8.7.1",
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open",
+    "export": "slidev export",
+    "prepare": "simple-git-hooks"
+  },
+  "dependencies": {
+    "fflate": "^0.8.1"
+  },
+  "devDependencies": {
+    "@iconify-json/logos": "^1.1.37",
+    "@iconify-json/uim": "^1.1.6",
+    "@penjj/eslint-config": "^0.3.7",
+    "@penjj/stylelint-config": "^0.3.7",
+    "@penjj/tsconfig": "^0.3.7",
+    "@slidev/cli": "^0.43.5",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "lint-staged": "^14.0.1",
+    "simple-git-hooks": "^2.9.0",
+    "slidev-theme-vuetiful": "^0.3.1",
+    "vue-commitlint": "^0.1.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged",
+    "commit-msg": "pnpm vue-commitlint"
+  },
+  "lint-staged": {
+    "*.vue": [
+      "eslint --fix",
+      "stylelint --fix"
+    ],
+    "*.md": "prettier --write"
+  },
+  "eslintConfig": {
+    "extends": "@penjj/eslint-config",
+    "rules": {
+      "vue/first-attribute-linebreak": "off",
+      "vue/max-attributes-per-line": "off",
+      "vue/singleline-html-element-content-newline": "off",
+      "max-len": "off"
+    }
+  },
+  "stylelint": {
+    "extends": "@penjj/stylelint-config"
+  },
+  "prettier": "@penjj/prettier-config"
+}

@@ -1,0 +1,7 @@
+{
+  "extends": "@penjj/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "lib": ["DOM", "ESNext"]
+  }
+}
