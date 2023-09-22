@@ -46,6 +46,4 @@ console.log('SCOPE 3:')
   }) // print 1
 
   state.foo++ // 期待打印 2
-
-  console.log(target)
 }

@@ -7,25 +7,24 @@ state.a = 10
 </script>
 
 <template>
-  <div flex justify-center items-center gap-10 w="min">
+  <div flex items-center gap-10 mt-4 c-gray-500>
     <button
-      p="2"
       font="mono"
-      w-10
-      outline="!none"
+      w-8
+      h-8
       hover:bg="gray-400 opacity-20"
-      border="~ main rounded-md"
+      border="~ main rounded-full"
       @click="state.a--"
     >
       -
     </button>
     <button
-      p="2"
       font="mono"
-      w-10
+      w-8
+      h-8
       outline="!none"
       hover:bg="gray-400 opacity-20"
-      border="~ main rounded-md"
+      border="~ main rounded-full"
       @click="state.a++"
     >
       +

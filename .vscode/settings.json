@@ -1,19 +1,19 @@
 {
   "files.exclude": {
-    "examples/*": true,
-    ".npmrc": true,
-    "setup": true,
-    "public": true,
-    "node_modules": true,
-    "components": true,
-    ".prettierignore": true,
-    "netlify.toml": true,
-    "pnpm-lock.yaml": true,
-    "vercel.json": true,
-    "README.md": true,
-    "tsconfig.json": true,
-    "package.json": true,
-    ".vscode": true,
-    ".gitignore": true
+    // "examples/*": true,
+    // ".npmrc": true,
+    // "setup": true,
+    // "public": true,
+    // "node_modules": true,
+    // "components": true,
+    // ".prettierignore": true,
+    // "netlify.toml": true,
+    // "pnpm-lock.yaml": true,
+    // "vercel.json": true,
+    // "README.md": true,
+    // "tsconfig.json": true,
+    // "package.json": true,
+    // ".vscode": true,
+    // ".gitignore": true
   }
 }
