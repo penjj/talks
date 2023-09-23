@@ -142,133 +142,31 @@ state.a = 10
 
 ---
 layout: default
+src: /points/reactivity.md
 ---
-
-```js {monaco} { editorOptions: { wordWrap:'on'}, height: '540px' }
-export function isObject(target) {
-  return typeof target === 'object' && target !== null
-}
-
-// 判断是否是响应式对象
-export function isReactive(target) {
-  return target && target.__v_isReactive
-}
-
-// 创建响应式对象
-// 通过 Proxy 代理对象，拦截对象的读取和设置操作，并通过 track 和 trigger 函数收集和触发依赖
-export function reactive(target) {
-  // 如果 target 不是对象，直接返回
-  if (!isObject(target)) {
-    return target
-  }
-
-  // 如果 target 已经是响应式对象，直接返回, 避免重复代理
-  if (isReactive(target)) {
-    return target
-  }
-
-  return new Proxy(target, {
-    get(obj, key) {
-      // 提供给 isReactive 方法使用
-      if (key === '__v_isReactive') {
-        return true
-      }
-      const res = obj[key]
-      // 当effect中运行函数触发响应式对象读取时，就会触发依赖收集，并按照effect进行分组
-      track(obj, key)
-
-      // 递归处理嵌套对象, 这也是vue2 和 vue3 响应式主要区别之一，只有当读取到对象的键值时，
-      // 才会将对象类型的值转换为响应式对象
-      // 这样也解决了 vue2 需要 $set 才能动态给对象添加响应式属性的问题
-      return isObject(res) ? reactive(res) : res
-    },
-    set(obj, key, value) {
-      obj[key] = value
-      trigger(obj, key) // 触发依赖
-      return true
-    },
-  })
-}
-
-// 当前激活的 effect
-let activeEffect = null
-
-// 副作用函数
-export function effect(fn) {
-  activeEffect = fn
-  fn()
-  activeEffect = null
-}
-
-/**
- * vue响应源和副作用函数关联存储结构图
- *
- * 响应式对象桶
- *
- * WeakMap<
- *  ReactiveObject, // 响应式对象是key
- *  Map<            // 值是Map类型
- *    key,          // 响应式对象的键是key
- *    Set<effect>   // 存储所有依赖于当前key 的 effect
- *  >
- * >
- */
-const targetMap = new WeakMap()
-
-/**
- * 收集响应式依赖，将当前激活的 effect 函数收集到依赖中
- * 这个方法通常是在 reactive 函数中的 Proxy 的 get 拦截器中自动触发的
- */
-export function track(target, key) {
-  if (!activeEffect) {
-    return
-  }
-  let depsMap = targetMap.get(target)
-  if (!depsMap) {
-    targetMap.set(target, (depsMap = new Map()))
-  }
-  let deps = depsMap.get(key)
-  if (!deps) {
-    depsMap.set(key, (deps = new Set()))
-  }
-  deps.add(activeEffect)
-}
-
-/**
- * 触发依赖，当响应式对象的值发生变化时，触发依赖
- * 这个方法通常是在 reactive 函数中的 Proxy 的 set 拦截器中自动触发的
- */
-export function trigger(target, key) {
-  const depsMap = targetMap.get(target)
-  if (!depsMap) {
-    return
-  }
-  const deps = depsMap.get(key)
-  if (deps) {
-    deps.forEach(fn => fn())
-  }
-}
-```
-
-
-<codicon-debug-start 
-  class="text-xs c-black absolute left-2 top-10"
-  @click="$slidev.nav.openInEditor('./examples/1-reactive/demo.js')"
-/>
-
-<style>
-  .slidev-layout {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-</style>
-
-
 ---
 layout: section
 ---
 # 逻辑分支管理
-<codicon-debug-start 
+
+<v-click>
+
+```js
+const state = reactive({ a: 10, flag: false })
+
+effect(() => {
+  console.log(state.flag ? state.a : null)
+})
+
+state.flag = true
+state.a = 20
+state.a = 30
+
+```
+</v-click>
+
+
+<codicon-debug-start
   v-click
   class="text-xs c-black absolute left-2 bottom-70 z-1"
   @click="$slidev.nav.openInEditor('./examples/1-reactive/issues.js')"
@@ -335,246 +233,13 @@ Reflect.defineProperty Proxy({ defineProperty: () => {} })
 
 
 ---
-
-```js {monaco-diff} { height: '540px' }
-export function isObject(target) {
-  return typeof target === 'object' && target !== null
-}
-
-// 判断是否是响应式对象
-export function isReactive(target) {
-  return target && target.__v_isReactive
-}
-
-// 创建响应式对象
-// 通过 Proxy 代理对象，拦截对象的读取和设置操作，并通过 track 和 trigger 函数收集和触发依赖
-export function reactive(target) {
-  // 如果 target 不是对象，直接返回
-  if (!isObject(target)) {
-    return target
-  }
-
-  // 如果 target 已经是响应式对象，直接返回, 避免重复代理
-  if (isReactive(target)) {
-    return target
-  }
-
-  return new Proxy(target, {
-    get(obj, key) {
-      // 提供给 isReactive 方法使用
-      if (key === '__v_isReactive') {
-        return true
-      }
-      const res = obj[key]
-      // 当effect中运行函数触发响应式对象读取时，就会触发依赖收集，并按照effect进行分组
-      track(obj, key)
-      // 递归处理嵌套对象, 这也是vue2 和 vue3 响应式主要区别之一，只有当读取到对象的键值时，
-      // 才会将对象类型的值转换为响应式对象
-      // 这样也解决了 vue2 需要 $set 才能动态给对象添加响应式属性的问题
-      return isObject(res) ? reactive(res) : res
-    },
-    set(obj, key, value) {
-      obj[key] = value
-      trigger(obj, key) // 触发依赖
-      return true
-    },
-  })
-}
-
-// 当前激活的 effect
-let activeEffect = null
-
-// 副作用函数
-export function effect(fn) {
-  activeEffect = fn
-  fn()
-  activeEffect = null
-}
-
-const targetMap = new WeakMap()
-
-/**
- * 收集响应式依赖，将当前激活的 effect 函数收集到依赖中
- * 这个方法通常是在 reactive 函数中的 Proxy 的 get 拦截器中自动触发的
- */
-export function track(target, key) {
-  if (!activeEffect) {
-    return
-  }
-  let depsMap = targetMap.get(target)
-  if (!depsMap) {
-    targetMap.set(target, (depsMap = new Map()))
-  }
-  let deps = depsMap.get(key)
-  if (!deps) {
-    depsMap.set(key, (deps = new Set()))
-  }
-  deps.add(activeEffect)
-}
-
-/**
- * 触发依赖，当响应式对象的值发生变化时，触发依赖
- * 这个方法通常是在 reactive 函数中的 Proxy 的 set 拦截器中自动触发的
- */
-export function trigger(target, key) {
-  const depsMap = targetMap.get(target)
-  if (!depsMap) {
-    return
-  }
-  const deps = depsMap.get(key)
-  if (deps) {
-    deps.forEach(fn => fn())
-  }
-}
-~~~
-export function isObject(target) {
-  return typeof target === 'object' && target !== null
-}
-
-// 判断是否是响应式对象
-export function isReactive(target) {
-  return target && target.__v_isReactive
-}
-
-// 创建响应式对象
-// 通过 Proxy 代理对象，拦截对象的读取和设置操作，并通过 track 和 trigger 函数收集和触发依赖
-export function reactive(target) {
-  // 如果 target 不是对象，直接返回
-  if (!isObject(target)) {
-    return target
-  }
-
-  // 如果 target 已经是响应式对象，直接返回, 避免重复代理
-  if (isReactive(target)) {
-    return target
-  }
-
-  return new Proxy(target, {
-    get(obj, key, receiver) {
-      // 提供给 isReactive 方法使用
-      if (key === '__v_isReactive') {
-        return true
-      }
-      const res = Reflect.get(obj, key, receiver)
-      track(obj, key)
-      // 递归处理嵌套对象, 这也是vue2 和 vue3 响应式主要区别之一，只有当读取到对象的键值时，
-      // 才会将对象类型的值转换为响应式对象
-      // 这样也解决了 vue2 需要 $set 才能动态给对象添加响应式属性的问题
-      return isObject(res) ? reactive(res) : res
-    },
-    set(obj, key, value, receiver) {
-      const res = Reflect.set(obj, key, value, receiver)
-      trigger(obj, key)
-      return res
-    },
-  })
-}
-
-/**
- * 清除 dep 和 effectFn 之间的响应性关联
- * 在track中，记录响应性时，把effect和dep双向关联了起来，为了解决分支问题
- * 在每次响应性开始运行时，会检索双端关联，并清除关联
- */
-export function cleanup(effectFn) {
-  const { deps } = effectFn
-  deps.forEach(dep => dep.delete(effectFn))
-  deps.length = 0
-}
-
-/**
- * 每次创建一个副作用函数，把activeEffect和副作用绑定起来，每次运行都会设置activeEffect,
- * 这样运行时都能触发依赖收集
- */
-
-// 当前激活的 effect
-let activeEffect = null
-
-// 使用数组结构储存多个 effect
-const effectStack = []
-
-// 副作用函数
-export function effect(fn) {
-  const effectFn = () => {
-    try {
-      cleanup(effectFn)
-      activeEffect = effectFn
-      effectStack.push(effectFn)
-      fn()
-    } finally {
-      // 执行完后，把当前执行effect 推出栈
-      effectStack.pop()
-      // 把上一个还没有运行完的effect 给激活，如果没有上一个，说明副作用栈已经运行完了
-      activeEffect = effectStack[effectStack.length - 1]
-    }
-  }
-  effectFn.deps = []
-  effectFn()
-}
-
-const targetMap = new WeakMap()
-
-/**
- * 收集响应式依赖，将当前激活的 effect 函数收集到依赖中
- * 这个方法通常是在 reactive 函数中的 Proxy 的 get 拦截器中自动触发的
- */
-export function track(target, key) {
-  if (!activeEffect) {
-    return
-  }
-  let depsMap = targetMap.get(target)
-  if (!depsMap) {
-    targetMap.set(target, (depsMap = new Map()))
-  }
-  let deps = depsMap.get(key)
-  if (!deps) {
-    depsMap.set(key, (deps = new Set()))
-  }
-
-  deps.add(activeEffect)
-  // 建立effect 和 deps 间的双端关联关系
-  activeEffect.deps.push(deps)
-}
-
-/**
- * 触发依赖，当响应式对象的值发生变化时，触发依赖
- * 这个方法通常是在 reactive 函数中的 Proxy 的 set 拦截器中自动触发的
- */
-export function trigger(target, key) {
-  const depsMap = targetMap.get(target)
-  if (!depsMap) {
-    return
-  }
-  const deps = depsMap.get(key)
-  const effectToRun = new Set(deps)
-  effectToRun.forEach(fn => {
-    // 如果当前正在收集器的effect和运行的副作用函数不是同一个，才会执行
-    // 否则会造成死循环
-    if (fn !== activeEffect) {
-      fn()
-    }
-  })
-}
-```
-
-<style>
-  .slidev-layout {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-</style>
-
-<codicon-debug-start 
-  v-click
-  class="text-xs c-black absolute left-2 bottom-70 z-1"
-  @click="$slidev.nav.openInEditor('./examples/2-reactive/demo.js')"
-/>
-
+src: /points/branch&reflect.md
+---
 ---
 layout: two-cols
 ---
 
-<template v-slot:default>
-创建一段最小响应性单元
+响应性代码
 ```js
 const state = reactive({ foo: 1, bar: 2 })
 
@@ -586,9 +251,7 @@ effect(function fnB() {
   console.log(state.foo + state.bar)
 })
 ```
-</template>
 
-<template v-slot:right>
 原来的单向关联数据结构
 ```ts
 TargetMap<{
@@ -599,6 +262,7 @@ TargetMap<{
 }>
 ```
 
+::right::
 双向关联的数据结构
 ```ts
 TargetMap<{
@@ -619,65 +283,14 @@ interface Effect<Fn, Deps> {
 }
 
 ```
-</template>
-
 ---
-
-# 响应性颗粒度
-
-Q：Vue性能为什么比React好？
-
-<div v-click>
-```jsx {monaco-diff}
-import { useState } from 'react'
-
-const Display = (props) => <div>{props.state}</div>
-
-const RenderLogger = <div>{console.log('rerender')}</div>
-
-const ReactApp = () => {
-  const [state, setState] = useState(1)
-  return (
-    <div>
-      <Display state={state}/> 
-      <RenderLogger/>
-      <button onClick={() => setState(state + 1)}>add</button>
-    </div>
-  )
-}
-~~~
-import { ref } from 'vue'
-
-const Display = (props) => <div>{props.state}</div>
-
-const RenderLogger = <div>{console.log('rerender')}</div>
-
-const VueApp = () => {
-    const state = ref(1)
-    return () => (
-      <div>
-        <Display state={state}/>
-        <RenderLogger/>
-        <button onClick={() => state.value ++}>add</button>
-      </div>
-    )
-  }
-```
-</div>
-
-<a href="/vue-vs-react.html" target="_blank">
-  <ic-round-open-in-new
-    v-after
-    class="text-xs c-black absolute left-2 top-40"
-    @click="$slidev.nav.openInEditor('./examples/1-reactive/demo.js')"
-  />
-</a>
+layout: two-cols
 ---
-# 最小颗粒度响应性
+<div mr-6>
 
-不管是Vue还是React，都会有嵌套渲染的问题。React响应性颗粒度无法像Vue一样高，所以只能按虚拟DOM树逐级
-渲染，即使页面没有改变。而Vue借助于最小响应单元。能实现颗粒度非常高的渲染。
+<h1>嵌套Effect</h1>
 
+组件树是如何渲染的？
 ```jsx
 const Foo = {
   render() {
@@ -687,39 +300,266 @@ const Foo = {
 
 const Bar = {
   render() {
-    return <div></div>
+    return <div>hello</div>
   }
 }
+createApp(Foo).mount('#app')
+```
 
+</div>
+
+::right::
+<div v-click>
+渲染顺序
+```mermaid
+graph LR
+    B[createApp]
+    B-->C[Foo.render]
+    C-->D[Bar.render];
+```
+</div>
+<div v-click text-xs bg-gray-100 p-2 mb-4>
+vue render方法产生了一份VDOM，而VDOM是响应式主要依赖，为了能让VDOM有响应性。实际上每个render
+都会在effect中执行
+</div>
+
+<v-click>
+
+```js
 effect(() => {
-  Foo.render() // 调用父组件的render，会同步调用子组件的render, 即形成了一条嵌套effect链
+  Foo.render()
   effect(() => {
     Bar.render()
   })
 })
 ```
 
-<span v-click class="text-xs absolute left-2 p-4px px-8px bottom-20 z-1" border="~ solid main" @click="$slidev.nav.openInEditor('./examples/2-reactive/issues.js')">运行</span>
+</v-click>
+
+<div v-click mt-4>
+为啥是嵌套effect而不是扁平effect？
+</div>
+
+<ul text-xs>
+  <li v-click>1. 存在props的情况下，子effect是依赖于父级effect的</li>
+  <li v-click>2. vue render过程是同步的</li>
+</ul>
+
+<codicon-debug-start 
+  v-click
+  class="text-xs c-black absolute left-2 bottom-6 z-1"
+  @click="$slidev.nav.openInEditor('./examples/2-reactive/issues.js')"
+/>
 
 ---
+src: /points/effect-stack.md
+---
 
-# Effect栈
-
-TODO: diff 增加栈结构和之前的代码
-
+---
+layout: outro
 ---
 
 # 可调度性
-嵌套effect为什么多执行了一次？在vue中连续赋值，为什么页面不会渲染多次？computed是如何实现懒执行的？watch又是怎么观测的？
+嵌套effect为什么多执行了一次？
+
+在vue中连续赋值，为什么页面不会渲染多次？
+
+computed是如何实现懒执行的？
+
+watch又是怎么观测的？
+
 
 ---
-
-# computed 实现
-
+src: /points/vue&react.md
 ---
 
-# watch 实现
+---
+src: /points/scheduler.md
+---
 
+---
+layout: section
+---
+# computed
+
+computed 和 effect 共同点
+* 能响应响应式数据源变化
+
+不同点
+* computed 不会立即执行一次
+* computed 有缓存，当值没有发生变化不会重新计算
+
+```js
+const state = reactive({ a: 1 })
+
+const double = computed(() => state.a * 2)
+
+effect(() => {
+  console.log(double.value)
+})
+
+state.a ++
+```
+
+
+---
+src: /points/computed.md
+---
+
+---
+layout: section
+---
+# watch
+
+watch 和 effect实际上也非常相似，区别是watch能观测到上一次值、和控制响应时机
+```js
+const state = reactive({ a: 1 })
+
+watch(() => state.a, (newVal, oldVal) => {
+  console.log(newVal, oldVal)
+})
+
+state.a ++
+```
+
+---
+src: /points/watch.md
+---
+
+
+---
+layout: two-cols
+---
+# 竞态问题
+
+<div text-xs>
+  在多线程编程语言中，竞态是一个经常被提及的问题，比如线程之间同时写入数据库，并且也有一些配套的解决方案。
+</div>
+<div text-xs mt-4>
+  前端只有单线程，所以竞态问题常常被忽略。那么前端是不是不存在竞态问题呢？
+</div>
+
+<v-click>
+
+```js
+const state = reactive({ id: 1 })
+const data = ref()
+
+watch(state, async (newVal) => {
+  const res = await fetch('/user/' + newVal.id)
+  data.value = res.data
+})
+
+state.id = 2
+state.id = 3
+```
+</v-click>
+
+<div v-click text-xs mt-4>
+如上代码所示，我们无法确定 data.value 具体会是哪一次网络请求的执行结果。vue对于watch api
+的清理过期副作用给出了一个解决方案
+</div>
+
+::right::
+<div v-click ml-8>
+
+```js
+
+const state = reactive({ id: 1 })
+const data = ref()
+
+watch(state, (newVal, _, onCleanup) => {
+  let isClear = false
+
+  // 每当一个新的 state.id 修改触发watch，如果上一个副作用函数还没有执行完，将触发回调，修改
+  // 上一个副作用函数的 isClear
+  onCleanup(() => {
+    isClear = true
+  })
+
+  const result = await fetch('/user/' + newVal.id)
+
+  // 如果当前副作用没有被清理
+  if (!isClear) {
+    data.value = res.data
+  }
+})
+
+state.id = 2
+state.id = 3
+```
+</div>
+
+---
+layout: section
+---
+
+<div flex>
+
+  <div flex-1 mr-8>
+  <h2>过滤同步值</h2>
+
+  ```js
+  const state = reactive({ a: 1 })
+
+  effect(() => {
+    // 这里会打印四次，但是vue在同步代码中，对数据进
+    // 行多次赋值，只会取最后更新的一次来对页面进行渲染
+    // 以节省性能开销
+    console.log(state.a) 
+  })
+
+  state.a ++
+  state.a ++
+  state.a ++
+  ```
+  </div>
+
+  <div flex-1 v-click relative z1>
+  
+  ```js {monaco}
+  const jobQueue = new Set()
+  const p = Promise.resolve()
+
+  let isFlushing = false
+
+  function flushJob() {
+    if (isFlushing) {
+      return
+    }
+    // 标记正在清空任务队列，防止多次清空队列
+    // 微任务会在同步任务之后执行，所以之后同步执行的代码触发了调度器
+    // 也只会将当前effect推入任务队列，并且调用flushJob也会被这里阻挡
+    isFlushing = true
+    p.then(() => {
+      jobQueue.forEach(job => job())
+      isFlushing = false
+      jobQueue.clear()
+    })
+  }
+
+  const state = reactive({ a: 1 })
+
+  effect(() => {
+    console.log(state.a)
+  }, {
+    scheduler(fn) {
+      jobQueue.add(fn)
+      flushJob()
+    }
+  })
+
+  state.a ++
+  state.a ++
+  ```
+  </div>
+</div>
+
+<style>
+  .slidev-code {
+    zoom: .85;
+  }
+</style>
 ---
 # ref实现
 

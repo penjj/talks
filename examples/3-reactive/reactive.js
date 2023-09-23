@@ -59,15 +59,19 @@ export function cleanup(effectFn) {
 // 当前激活的 effect
 let activeEffect = null
 
+const effectStack = []
+
 // 副作用函数
 export function effect(fn) {
   const effectFn = () => {
     try {
       cleanup(effectFn)
       activeEffect = effectFn
+      effectStack.push(effectFn)
       fn()
     } finally {
-      activeEffect = null
+      effectStack.pop()
+      activeEffect = effectStack[effectStack.length - 1]
     }
   }
   effectFn.deps = []

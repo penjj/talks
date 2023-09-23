@@ -1,7 +1,10 @@
+
+```js {monaco} { editorOptions: { wordWrap:'on'}, height: '540px' }
 export function isObject(target) {
   return typeof target === 'object' && target !== null
 }
 
+// 判断是否是响应式对象
 export function isReactive(target) {
   return target && target.__v_isReactive
 }
@@ -20,60 +23,51 @@ export function reactive(target) {
   }
 
   return new Proxy(target, {
-    get(obj, key, receiver) {
+    get(obj, key) {
       // 提供给 isReactive 方法使用
       if (key === '__v_isReactive') {
         return true
       }
-      const res = Reflect.get(obj, key, receiver)
+      const res = obj[key]
+      // 当effect中运行函数触发响应式对象读取时，就会触发依赖收集，并按照effect进行分组
       track(obj, key)
+
       // 递归处理嵌套对象, 这也是vue2 和 vue3 响应式主要区别之一，只有当读取到对象的键值时，
       // 才会将对象类型的值转换为响应式对象
       // 这样也解决了 vue2 需要 $set 才能动态给对象添加响应式属性的问题
       return isObject(res) ? reactive(res) : res
     },
-    set(obj, key, value, receiver) {
-      const res = Reflect.set(obj, key, value, receiver)
-      trigger(obj, key)
-      return res
+    set(obj, key, value) {
+      obj[key] = value
+      trigger(obj, key) // 触发依赖
+      return true
     },
   })
 }
-
-/**
- * 清除 dep 和 effectFn 之间的响应性关联
- * 在track中，记录响应性时，把effect和dep双向关联了起来，为了解决分支问题
- * 在每次响应性开始运行时，会检索双端关联，并清除关联
- */
-export function cleanup(effectFn) {
-  const { deps } = effectFn
-  deps.forEach(dep => dep.delete(effectFn))
-  deps.length = 0
-}
-
-/**
- * 每次创建一个副作用函数，把activeEffect和副作用绑定起来，每次运行都会设置activeEffect,
- * 这样运行时都能触发依赖收集
- */
 
 // 当前激活的 effect
 let activeEffect = null
 
 // 副作用函数
 export function effect(fn) {
-  const effectFn = () => {
-    try {
-      cleanup(effectFn)
-      activeEffect = effectFn
-      fn()
-    } finally {
-      activeEffect = null
-    }
-  }
-  effectFn.deps = []
-  effectFn()
+  activeEffect = fn
+  fn()
+  activeEffect = null
 }
 
+/**
+ * vue响应源和副作用函数关联存储结构图
+ *
+ * 响应式对象桶
+ *
+ * WeakMap<
+ *  ReactiveObject, // 响应式对象是key
+ *  Map<            // 值是Map类型
+ *    key,          // 响应式对象的键是key
+ *    Set<effect>   // 存储所有依赖于当前key 的 effect
+ *  >
+ * >
+ */
 const targetMap = new WeakMap()
 
 /**
@@ -92,10 +86,7 @@ export function track(target, key) {
   if (!deps) {
     depsMap.set(key, (deps = new Set()))
   }
-
   deps.add(activeEffect)
-  // 建立effect 和 deps 间的双端关联关系
-  activeEffect.deps.push(deps)
 }
 
 /**
@@ -108,12 +99,22 @@ export function trigger(target, key) {
     return
   }
   const deps = depsMap.get(key)
-  const effectToRun = new Set(deps)
-  effectToRun.forEach(fn => {
-    // 如果当前正在收集器的effect和运行的副作用函数不是同一个，才会执行
-    // 否则会造成死循环
-    if (fn !== activeEffect) {
-      fn()
-    }
-  })
+  if (deps) {
+    deps.forEach(fn => fn())
+  }
 }
+```
+
+<codicon-debug-start 
+  class="text-xs c-black absolute left-2 top-10"
+  @click="$slidev.nav.openInEditor('./examples/1-reactive/demo.js')"
+/>
+
+<style>
+  .slidev-layout {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+</style>

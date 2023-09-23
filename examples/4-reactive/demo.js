@@ -11,6 +11,3 @@ effect(() => {
 
 state.foo++
 state.bar = 'b'
-
-// 期待打印 1 a 2 b
-// 实际打印 1 a 2 a b b

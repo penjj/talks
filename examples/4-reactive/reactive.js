@@ -59,17 +59,22 @@ export function cleanup(effectFn) {
 // 当前激活的 effect
 let activeEffect = null
 
+const effectStack = []
+
 // 副作用函数
-export function effect(fn) {
+export function effect(fn, options = {}) {
   const effectFn = () => {
     try {
       cleanup(effectFn)
       activeEffect = effectFn
+      effectStack.push(effectFn)
       fn()
     } finally {
-      activeEffect = null
+      effectStack.pop()
+      activeEffect = effectStack[effectStack.length - 1]
     }
   }
+  effectFn.options = options // 新增 options 属性，里面可以传入一些配置，如调度器
   effectFn.deps = []
   effectFn()
 }
@@ -110,9 +115,11 @@ export function trigger(target, key) {
   const deps = depsMap.get(key)
   const effectToRun = new Set(deps)
   effectToRun.forEach(fn => {
-    // 如果当前正在收集器的effect和运行的副作用函数不是同一个，才会执行
-    // 否则会造成死循环
-    if (fn !== activeEffect) {
+    if (fn.options.scheduler) {
+      // 如果有调度器，就执行调度器
+      fn.options.scheduler(fn)
+    } else {
+      // 没有调度器直接执行副作用函数
       fn()
     }
   })
