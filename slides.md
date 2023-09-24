@@ -1,7 +1,8 @@
 ---
 theme: vuetiful
 clicks: 1
-altCover: false 
+altCover: false
+monaco: true
 ---
 
 # VUE源码解析
