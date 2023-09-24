@@ -5,7 +5,7 @@ altCover: false
 ---
 
 # VUE源码解析
-响应式原理
+· 响应式原理
 
 ---
 layout: quote
@@ -15,6 +15,8 @@ WeakMap 和 Map 区别
 ---
 layout: two-cols
 ---
+<div mr-10>
+
 Map深引用
 ```js
 const map = new Map()
@@ -30,6 +32,7 @@ obj = null // 主动回收
 // 原来的对象被删除了，Map仍然持有一份原对象的引用
 console.log(map.get(obj)) // 'map'
 ```
+</div>
 
 ::right::
 WeakMap浅引用
@@ -71,6 +74,7 @@ layout: section
 
 ```
 <div v-click>
+
 ```mermaid
 graph TD
     B[vue]
@@ -93,7 +97,7 @@ graph TD
 layout: outro
 ---
 
-# @vue/reactivity
+# 响应式编程
 
 <div class="flex">
   <div class="flex-1">
@@ -147,7 +151,11 @@ src: /points/reactivity.md
 ---
 layout: section
 ---
-# 逻辑分支管理
+
+<div flex>
+
+<div flex-1>
+<h1>逻辑分支管理</h1>
 
 <v-click>
 
@@ -172,13 +180,40 @@ state.a = 30
   @click="$slidev.nav.openInEditor('./examples/1-reactive/issues.js')"
 />
 
+<div text-xs>
+  <div v-click mt-4>1. 初始化响应式数据源时分支未激活，导致部分依赖错过收集期</div>
+  <div v-click mt-2>2. 当一个分支暂时失焦时，没有清理该分支内数据源</div>
+</div>
 
-<h3 v-click relative z-1>1. 初始化响应式数据源时分支未激活，导致部分依赖错过收集期</h3>
-<h3 v-click>2. 当一个分支暂时失焦时，没有清理该分支内数据源</h3>
-<h3 v-click relative z-1>
-3. Proxy类构造了一个新的代理对象，只有触发代理对象的set、get才能进行依赖收集和依赖更新
-</h3>
+</div>
 
+<div flex-1 relative z1 ml-8>
+<h1 v-click>this指向问题</h1>
+
+<div v-after>
+
+```js
+const target = { a: 1 }
+
+const state = reactive(target)
+
+effect(() => {
+  console.log(target.a)
+})
+
+state.a++
+```
+</div>
+
+<div text-xs>
+  <div v-click mt-2>
+  3. Proxy类构造了一个新的代理对象，只有触发代理对象的set、get才能进行依赖收集和依赖更新
+  </div>
+</div>
+</div>
+
+
+</div>
 
 <style>
   .slidev-layout {
@@ -195,7 +230,7 @@ state.a = 30
 
 # Reflect & Proxy
 <div v-click>
-在一些强类型语言里面，Reflect（反射）是用来在运行时观测对象，并且能修改或读取对象的一种机制。
+在一些静态类型语言里面，Reflect（反射）是用来在运行时观测对象，并且能修改或读取对象的一种机制。
 ```java
 Class clz = Class.forName("com.chenshuyi.reflect.Apple"); // java
 Method method = clz.getMethod("setPrice", int.class);
@@ -206,7 +241,7 @@ method.invoke(object, 4);
 </div>
 
 <div v-click>
-js, 高级动态脚本语言, 不需要这种机制，只要对象有属性，属性是个方法。在es11的可选链语法下，能更安全且方便的来操作运行时的对象。
+js是弱类型脚本语言, 不需要这种机制，只要对象有属性，属性是个方法。在es11的可选链语法下，能更安全且方便的来操作运行时的对象。
 ```js
 window.sayHello?.() // javascript
 ```
@@ -360,18 +395,13 @@ layout: outro
 ---
 
 # 可调度性
-嵌套effect为什么多执行了一次？
-
-在vue中连续赋值，为什么页面不会渲染多次？
-
-computed是如何实现懒执行的？
-
-watch又是怎么观测的？
 
 
----
-src: /points/vue&react.md
----
+vue中同步执行的代码只会触发一次页面更新？
+
+nextTick回为什么总是会在下一次页面更新后执行？
+
+computed只有当依赖变化后才会触发重新计算？
 
 ---
 src: /points/scheduler.md
@@ -411,12 +441,16 @@ layout: section
 ---
 # watch
 
-watch 和 effect实际上也非常相似，区别是watch能观测到上一次值、和控制响应时机
+watch 和 effect实际上也非常相似，区别是watch能控制是否进
+
+行初始执行，能观测到上一次值、和控制响应时机
 ```js
 const state = reactive({ a: 1 })
 
 watch(() => state.a, (newVal, oldVal) => {
   console.log(newVal, oldVal)
+}, {
+  immediate: true
 })
 
 state.a ++
@@ -468,7 +502,7 @@ state.id = 3
 const state = reactive({ id: 1 })
 const data = ref()
 
-watch(state, (newVal, _, onCleanup) => {
+watch(state, async (newVal, _, onCleanup) => {
   let isClear = false
 
   // 每当一个新的 state.id 修改触发watch，如果上一个副作用函数还没有执行完，将触发回调，修改
@@ -489,6 +523,13 @@ state.id = 2
 state.id = 3
 ```
 </div>
+
+<codicon-debug-start 
+  v-click
+  class="text-xs c-black absolute left-2 bottom-70 z-1"
+  @click="$slidev.nav.openInEditor('./examples/6-watch/demo2.js')"
+/>
+
 
 ---
 layout: section
@@ -560,15 +601,11 @@ layout: section
     zoom: .85;
   }
 </style>
+
+
 ---
 # ref实现
 
 ---
 
-# 你很少用到，但是能性能提升的hooks
-
-## shallowRef/shallowReactive
-
-## toRaw/markRaw
-
-shallowUnwrapRef/readonly/shallowReadonly
+<h1 text-center mt-47>谢谢观看</h1>

@@ -52,8 +52,8 @@ export function watch(source, cb, options = {}) {
   const job = () => {
     // 重新执行副作用函数
     const newValue = effectFn()
-    cb(newValue, oldValue, onCleanup)
     cleanup && cleanup()
+    cb(newValue, oldValue, onCleanup)
     oldValue = newValue
   }
 

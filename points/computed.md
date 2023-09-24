@@ -54,5 +54,5 @@ export function computed(getter) {
 <codicon-debug-start 
   v-click
   class="text-xs c-black absolute left-2 bottom-70 z-1"
-  @click="$slidev.nav.openInEditor('./examples/3-reactive/demo.js')"
+  @click="$slidev.nav.openInEditor('./examples/5-computed/demo.js')"
 />

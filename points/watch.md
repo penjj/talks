@@ -78,5 +78,5 @@ export function watch(source, cb, options = {}) {
 <codicon-debug-start 
   v-click
   class="text-xs c-black absolute left-2 bottom-70 z-1"
-  @click="$slidev.nav.openInEditor('./examples/3-reactive/demo.js')"
+  @click="$slidev.nav.openInEditor('./examples/6-watch/demo.js')"
 />

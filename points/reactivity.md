@@ -1,5 +1,8 @@
 
-```js {monaco} { editorOptions: { wordWrap:'on'}, height: '540px' }
+<div flex>
+<div flex-1 h-540px overflow-scroll>
+
+```js
 export function isObject(target) {
   return typeof target === 'object' && target !== null
 }
@@ -104,8 +107,54 @@ export function trigger(target, key) {
   }
 }
 ```
+</div>
 
-<codicon-debug-start 
+<div v-click>
+
+
+```js
+const state = reactive({ a: 1 })
+
+effect(() => {
+  console.log(state.a)
+})
+
+state.a ++
+```
+
+<div mt-4 mb-2>调用过程</div>
+
+```mermaid
+graph LR
+    A["reactive({a: 1})"]
+    A-->B["effect(fn)"]
+    B-->C["fn()"]
+    C-->D["track(state, 'a')"]
+```
+
+<div text-xs mt-2>第一次执行完effect后targetMap状态</div>
+
+```js
+TargetMap<{
+  state: {
+    a: [fn]
+  }
+}>
+```
+
+<div text-xs mt-4 mb-3>赋值触发set中的trigger,然后去targetMap中找副作用函数并执行</div>
+
+```mermaid
+graph LR
+    A["state.a ++"]
+    A-->B["trigger(state, 'a')"]
+    B-->C["fn"]
+```
+</div>
+</div>
+
+<codicon-debug-start
+  v-click
   class="text-xs c-black absolute left-2 top-10"
   @click="$slidev.nav.openInEditor('./examples/1-reactive/demo.js')"
 />

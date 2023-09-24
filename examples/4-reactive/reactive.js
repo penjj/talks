@@ -33,6 +33,9 @@ export function reactive(target) {
       return isObject(res) ? reactive(res) : res
     },
     set(obj, key, value, receiver) {
+      if (obj[key] === value) {
+        return true
+      }
       const res = Reflect.set(obj, key, value, receiver)
       trigger(obj, key)
       return res
@@ -68,7 +71,7 @@ export function effect(fn, options = {}) {
       cleanup(effectFn)
       activeEffect = effectFn
       effectStack.push(effectFn)
-      fn()
+      return fn()
     } finally {
       effectStack.pop()
       activeEffect = effectStack[effectStack.length - 1]
@@ -76,7 +79,11 @@ export function effect(fn, options = {}) {
   }
   effectFn.options = options // 新增 options 属性，里面可以传入一些配置，如调度器
   effectFn.deps = []
-  effectFn()
+  if (!options.lazy) {
+    effectFn()
+  }
+
+  return effectFn
 }
 
 const targetMap = new WeakMap()

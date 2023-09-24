@@ -46,6 +46,23 @@ console.log('SCOPE 3:')
   }) // print 1
 
   state.foo++ // 期待打印 2
+}
 
-  console.log(target)
+console.log()
+console.log('SCOPE 4:')
+
+{
+  const target = {
+    foo: 1,
+    value() {
+      return this.foo // 这里this会指向原始对象，实际上读取原始对象并不会触发响应性，必须得触发响应式对象才能触发依赖收集
+    },
+  }
+  const state = reactive(target)
+
+  effect(() => {
+    console.log(state.value())
+  }) // print 1
+
+  state.foo++ // 期待打印 2
 }

@@ -30,6 +30,8 @@ export function computed(getter) {
       if (dirty) {
         value = effectFn()
         dirty = false
+      } else {
+        console.log('数据源没有改变，从缓存中取')
       }
       // 读取时才收集依赖
       track(obj, 'value')

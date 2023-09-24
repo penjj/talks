@@ -16,9 +16,6 @@ export default defineMonacoSetup(monaco => {
     editorOptions: {
       lineNumbers: 'on',
       lineDecorationsWidth: 16,
-      minimap: {
-        enabled: true,
-      },
     },
   }
 })
