@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: 'talks',
-  build: {
-    rollupOptions: {
-      external: [/^\/.*(\.svg|.gif)$/],
+  base: process.env.GITHUB_ACTIONS ? './talks' : '/',
+  resolve: {
+    alias: {
+      '/': './public',
     },
   },
 })

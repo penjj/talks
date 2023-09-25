@@ -9,6 +9,9 @@
     "prepare": "simple-git-hooks",
     "test": "vitest"
   },
+  "dependencies": {
+    "slidev-theme-vuetiful": "^0.3.1"
+  },
   "devDependencies": {
     "@iconify-json/codicon": "^1.1.30",
     "@iconify-json/ic": "^1.1.14",
@@ -22,7 +25,6 @@
     "@slidev/theme-seriph": "latest",
     "lint-staged": "^14.0.1",
     "simple-git-hooks": "^2.9.0",
-    "slidev-theme-vuetiful": "^0.3.1",
     "vitest": "^0.34.5",
     "vue-commitlint": "^0.1.0"
   },
