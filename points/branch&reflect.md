@@ -118,6 +118,7 @@ export function reactive(target) {
       if (key === '__v_isReactive') {
         return true
       }
+      // receiver 是一个指向当前proxy的指针，Reflect.get 能传入第三个参数this指针
       const res = Reflect.get(obj, key, receiver)
       track(obj, key)
       // 递归处理嵌套对象, 这也是vue2 和 vue3 响应式主要区别之一，只有当读取到对象的键值时，

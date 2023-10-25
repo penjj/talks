@@ -122,14 +122,13 @@ effect(() => {
 state.a ++
 ```
 
-<div mt-4 mb-2>调用过程</div>
+<div mt-4 mb-2>执行过程</div>
 
 ```mermaid
 graph LR
-    A["reactive({a: 1})"]
-    A-->B["effect(fn)"]
-    B-->C["fn()"]
-    C-->D["track(state, 'a')"]
+    A["调用reactive\n创建目标者"]
+    A-->B["调用effect触发track\n让目标者添加回调"]
+    B-->C["目标者发生变化触发trigger\n并调用观察者的回调"]
 ```
 
 <div text-xs mt-2>第一次执行完effect后targetMap状态</div>

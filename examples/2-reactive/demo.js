@@ -1,6 +1,6 @@
 import { reactive, effect } from './reactive'
 
-console.log('SCOPE 1:')
+console.log('分支切换问题 1:')
 
 {
   const state = reactive({ a: 10, enable: false })
@@ -15,7 +15,7 @@ console.log('SCOPE 1:')
 }
 
 console.log()
-console.log('SCOPE 2:')
+console.log('分支切换问题 2:')
 
 {
   const state = reactive({ a: 10, enable: true })
@@ -30,7 +30,7 @@ console.log('SCOPE 2:')
 }
 
 console.log()
-console.log('SCOPE 3:')
+console.log('this 指向修正 3:')
 
 {
   const target = {

@@ -9,6 +9,78 @@ monaco: true
 · 响应式原理
 
 ---
+layout: outro
+---
+
+<div class="flex">
+  <div class="flex-1">
+    <h2 v-click>1. 什么是响应式编程？</h2>
+    <img v-click class="w-80" src="/reactivity-spreadsheet.gif"/>
+  </div>
+  <div class="flex-1">
+    <h2 v-click>2. VUE响应性原理是什么？</h2>
+    <div text-sm>
+      <div v-click mb-2>1. vue2 基于发布订阅模式，拦截对象的存、取操作。</div>
+      <div v-click>
+```mermaid
+graph LR
+    B[订阅者（虚拟DOM）]
+    B-->|订阅消息| C[调度中心（调度器）]
+    C-->|通知订阅者| B
+    D[发布者（组件实例vm）]-->|发布事件| C;
+```
+      </div>
+      <div v-click>2. vue3 基于观察者模式，利用Proxy提供的元编程能力, 拦截对象的增、删、存、取操作。vue3实现了一个最小响应式单元，所有的响应性只在effect域中有效。</div>
+      <div v-click>
+```mermaid
+graph LR
+    B[观察者（虚拟DOM）]
+    B-->|观测目标变化| C[目标者（reactive、ref）]
+    C-->|通知观察者| B
+```
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<style>
+  .slidev-vclick-target {
+    transition: all 500ms ease;
+  }
+
+  .slidev-vclick-hidden {
+    transform: scale(0);
+    transition-origin: left center;
+  }
+</style>
+
+---
+layout: big-points
+---
+
+# 最小响应单元
+```js
+import { reactive, effect } from 'vue'
+
+const state = reactive({ a: 1})
+
+effect(() => {
+  console.log(state.a)
+})
+
+state.a = 10
+```
+
+<Counter/>
+
+---
+layout: default
+src: /points/reactivity.md
+---
+
+---
 layout: quote
 ---
 WeakMap 和 Map 区别
@@ -16,6 +88,7 @@ WeakMap 和 Map 区别
 ---
 layout: two-cols
 ---
+
 <div mr-10>
 
 Map深引用
@@ -56,103 +129,6 @@ console.log(weakmap.get(obj)) // undefined
 layout: section
 ---
 
-# 源码结构
-
-```bash
-├── packages
-│   ├── compiler-core # 编译器核心
-│   ├── compiler-dom # 编译客户端渲染代码
-│   ├── compiler-ssr # 编译服务端渲染
-│   ├── compiler-sfc # 编译器主入口
-│   ├── reactivity # 响应性核心
-|   ├── reactivity-transform # 响应式转换
-│   ├── runtime-core # 运行时核心
-│   ├── runtime-dom # 运行时和dom相关操作
-│   ├── server-renderer # 服务端渲染器
-│   ├── shared # 公共代码
-│   ├── vue # 入口包
-│   ├── vue-compat # vue option api兼容包
-
-```
-<div v-click>
-
-```mermaid
-graph TD
-    B[vue]
-    B-->C[@vue/compiler-sfc]
-    B-->D[@vue/reactivity];
-    B-->E(@vue/runtime-dom);
-```
-</div>
-
-<img
-  v-click
-  class="absolute bottom-8.5 left-56 w-56"
-  src="/arrow-bottom-left.svg"
-/>
-
-<p v-after class="absolute bottom-38 left-110 c-#5bbd8f transform -rotate-10">今天主要分享内容</p>
-
-
----
-layout: outro
----
-
-# 响应式编程
-
-<div class="flex">
-  <div class="flex-1">
-    <h2 v-click>1. 什么是响应式编程？</h2>
-    <img v-click class="w-80" src="/reactivity-spreadsheet.gif"/>
-  </div>
-  <div class="flex-1">
-    <h2 v-click>2. VUE响应性原理是什么？</h2>
-    <div text-sm>
-      <div v-click mb-2>1. vue2 基于发布订阅模式，拦截对象的存、取操作。</div>
-      <div v-click>2. vue3 基于观察者模式，利用Proxy提供的元编程能力, 拦截对象的增、删、存、取操作。vue3实现了一个最小响应式单元，所有的响应性只在effect域中有效。</div>
-    </div>
-  </div>
-</div>
-
-
-
-<style>
-  .slidev-vclick-target {
-    transition: all 500ms ease;
-  }
-
-  .slidev-vclick-hidden {
-    transform: scale(0);
-    transition-origin: left center;
-  }
-</style>
-
----
-layout: big-points
----
-# 最小响应单元
-```js
-import { reactive, effect } from 'vue'
-
-const state = reactive({ a: 1})
-
-effect(() => {
-  console.log(state.a)
-})
-
-state.a = 10
-```
-
-<Counter/>
-
----
-layout: default
-src: /points/reactivity.md
----
----
-layout: section
----
-
 <div flex>
 
 <div flex-1>
@@ -187,32 +163,58 @@ state.a = 30
 </div>
 
 </div>
+</div>
 
-<div flex-1 relative z1 ml-8>
-<h1 v-click>this指向问题</h1>
+---
+layout: section
+---
+
+<div flex>
+
+<div flex-1>
+<h2 v-click>this指向问题</h2>
 
 <div v-after>
 
 ```js
-const target = { a: 1 }
-
+const target = {
+  foo: 1,
+  get value() {
+    return this.foo
+  },
+}
 const state = reactive(target)
 
 effect(() => {
-  console.log(target.a)
+  console.log(state.value)
 })
 
-state.a++
+state.foo++ // 期待打印 2，实际打印1，说明this指向了原对象
 ```
 </div>
 
-<div text-xs>
-  <div v-click mt-2>
-  3. Proxy类构造了一个新的代理对象，只有触发代理对象的set、get才能进行依赖收集和依赖更新
-  </div>
-</div>
 </div>
 
+<div flex-1 relative z1 ml-8>
+<h2 v-click>实际相当于</h2>
+<v-click>
+
+```js
+// 因为修改的是原对象，
+// 实际上述代码执行结果和此处相同
+const obj = { a: 1 }
+const state = reactive(obj)
+
+effect(() => {
+  console.log(state.a)
+})
+
+obj.a = 30
+
+```
+</v-click>
+
+</div>
 
 </div>
 
@@ -231,7 +233,7 @@ state.a++
 
 # Reflect & Proxy
 <div v-click>
-在一些静态类型语言里面，Reflect（反射）是用来在运行时观测对象，并且能修改或读取对象的一种机制。
+在一些静态类型语言里面，Reflect（反射）是用来在运行时读取对象，并且能修改或读取对象的一种机制。
 ```java
 Class clz = Class.forName("com.chenshuyi.reflect.Apple"); // java
 Method method = clz.getMethod("setPrice", int.class);
@@ -249,7 +251,8 @@ window.sayHello?.() // javascript
 </div>
 
 <div v-click>
-Reflect在ES6中被设计成一个专门用来操作对象的类，并且它的方法基本和Proxy能拦截的属性一致, 甚至参数数量都一致
+众所周知，Object 几乎没有几个方法, Reflect是Object对象方法的补充，能直接操作Object,
+并且它的方法基本和Proxy能拦截的方法基本一致，所以也是和Proxy配套出现的Api。
 ```js
 Reflect.get      Proxy({ get: () => {} })
 Reflect.set      Proxy({ set: () => {} })
@@ -271,6 +274,7 @@ Reflect.defineProperty Proxy({ defineProperty: () => {} })
 ---
 src: /points/branch&reflect.md
 ---
+
 ---
 layout: two-cols
 ---
@@ -400,9 +404,9 @@ layout: outro
 
 vue中同步执行的代码只会触发一次页面更新？
 
-nextTick回为什么总是会在下一次页面更新后执行？
+nextTick为什么总能准确的在下次页面更新后执行？
 
-computed只有当依赖变化后才会触发重新计算？
+computed为什么只有当依赖变化后才会触发重新计算？
 
 ---
 src: /points/scheduler.md
