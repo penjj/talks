@@ -62,7 +62,7 @@ layout: big-points
 
 # 最小响应单元
 ```js
-import { reactive, effect } from 'vue'
+import { reactive, effect } from '@vue/reactivity'
 
 const state = reactive({ a: 1})
 
