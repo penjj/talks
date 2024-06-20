@@ -3,10 +3,10 @@ theme: vuetiful
 clicks: 1
 altCover: false
 monaco: true
+colorSchema: light
 ---
 
-# VUE源码解析
-· 响应式原理
+# VUE响应式原理及实现
 
 ---
 layout: outro

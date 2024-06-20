@@ -117,3 +117,10 @@ export function trigger(target, key) {
     }
   })
 }
+
+// const set = new Set([1])
+// set.forEach(i => {
+//   set.delete(i)
+//   set.add(i)
+//   console.log('run')
+// })
