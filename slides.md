@@ -1,6 +1,6 @@
 ---
 theme: seriph 
-background: https://cover.sli.dev
+background: /bg-cover.svg
 class: text-center
 highlighter: shiki
 title: VUE响应式原理及实现
@@ -11,18 +11,20 @@ mdc: true
 ---
 # VUE响应式原理及实现
 ---
+layout: two-cols
+---
+## 什么是响应式编程？
 
-<div class="flex">
-  <div class="flex-1">
-    <h2 v-click mb10>1. 什么是响应式编程？</h2>
-    <img v-click class="w-80" src="/reactivity-spreadsheet.gif"/>
-  </div>
-  <div class="flex-1">
-    <h2 v-click mb10>2. VUE响应性原理是什么？</h2>
-    <div>
-      <div v-click mb4>
-        <h3 mb-2>vue2 基于发布订阅模式</h3>
-        <div>
+<img v-click mt-10 w-80 src="/reactivity-spreadsheet.gif"/>
+
+::right::
+
+<v-clicks>
+
+## VUE响应性原理是什么？
+
+<div mt8>
+- 基于发布订阅模式实现的 vue2
 ```mermaid
 graph LR
     B[订阅者（虚拟DOM）]
@@ -30,24 +32,19 @@ graph LR
     C-->|通知订阅者| B
     D[发布者（组件实例vm）]-->|发布事件| C;
 ```
-        </div>
-      </div>
-      <div v-click>
-        <h3>vue3 基于观察者模式</h3>
-        <div>
+</div>
+
+<div mt8>
+- 基于观察者模式实现的 vue3
 ```mermaid
 graph LR
     B[观察者（虚拟DOM）]
     B-->|观测目标变化| C[目标者（reactive、ref）]
     C-->|通知观察者| B
 ```
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
-
+</v-clicks>
 
 <style>
   .slidev-vclick-target {
@@ -57,6 +54,10 @@ graph LR
   .slidev-vclick-hidden {
     transform: scale(0);
     transition-origin: left center;
+  }
+
+  ul {
+    margin-top: 20px;
   }
 </style>
 

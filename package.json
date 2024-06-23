@@ -1,10 +1,11 @@
 {
   "name": "vue_reactivity",
   "type": "module",
+  "packageManager": "pnpm@9.4.0",
   "private": true,
   "scripts": {
     "build": "slidev build",
-    "dev": "slidev --open",
+    "dev": "slidev --open ",
     "export": "slidev export"
   },
   "dependencies": {
@@ -12,5 +13,8 @@
     "@slidev/theme-default": "latest",
     "@slidev/theme-seriph": "latest",
     "vue": "^3.4.27"
+  },
+  "devDependencies": {
+    "@penjj/tsconfig": "^0.3.7"
   }
 }
