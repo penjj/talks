@@ -10,10 +10,16 @@ transition: slide-left
 mdc: true
 ---
 # VUE响应式原理及实现
+
+
+<!-- 
+
+
+ -->
 ---
 layout: two-cols
 ---
-## 什么是响应式编程？
+# 什么是响应式编程？
 
 <img v-click mt-10 w-80 src="/reactivity-spreadsheet.gif"/>
 
@@ -21,7 +27,7 @@ layout: two-cols
 
 <v-clicks>
 
-## VUE响应性原理是什么？
+# VUE响应性原理是什么？
 
 <div mt8>
 - 基于发布订阅模式实现的 vue2
@@ -62,29 +68,78 @@ graph LR
 </style>
 
 ---
-layout: big-points
+layout: two-cols-footer
+transition: slide-up
+level: 2
 ---
 
+# VUE最小响应式单元
 
-# Welcome to Slidev
+```ts {monaco-run}
+import { ref, effect } from 'vue'
 
-Presentation slides for developers
+const state = ref(1)
+effect(() => {
+  console.log(state.value)
+})
 
-<div class="pt-12">
-  <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
-    Press Space for next page <carbon:arrow-right class="inline"/>
-  </span>
-</div>
+state.value++
+```
 
-<div class="abs-br m-6 flex gap-2">
-  <button @click="$slidev.nav.openInEditor()" title="Open in Editor" class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
-    <carbon:edit />
-  </button>
-  <a href="https://github.com/slidevjs/slidev" target="_blank" alt="GitHub" title="Open in GitHub"
-    class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
-    <carbon-logo-github />
-  </a>
-</div>
+
+::right::
+<v-click>
+
+# SOLID-JS最小响应单元
+
+```tsx
+import { createSignal } from 'solid-js'
+
+const Counter = () => {
+  const [count, setCount] = createSignal(1)
+  const increment = () => setCount(prev => prev + 1)
+
+  return (
+    <button type="button" onClick={increment}>
+      {count()}
+    </button>
+  )
+}
+```
+
+</v-click>
+
+---
+
+# 为什么需要虚拟DOM？
+
+<v-click>
+
+- 减少操作DOM，操作DOM性能代价极其昂贵
+- 用来进行Diff，准确的找到需要更新的节点
+
+</v-click>
+
+<v-clicks>
+
+<br>
+<br>
+
+# 什么是 Signal (信号)
+定义：在访问时跟踪依赖，在依赖变更时能在特定容器里触发副作用。
+
+
+[点击查看VUE响应粒度](https://play.vuejs.org/#eNp9ks1uwjAQhF/F8iUgUFDSnlBA/RGH9tBWbY++0LCkBse27DVFivLutZ0CaVW4rWfG3+5abuit1unOAZ3SwpaGayQW0Ok5k7zWyiBpiIE1acnaqJokPpowyWSppEVSKicxI7MQGWTDX3Lek4tJx/ZUf0CotVgi+BMhxYdDVJLclIKX2xmjP8zRiNF5rEk2JU1z6NW2sZZWCUiFqgaJAbkCkyVD7xWTDncBnffR+Qmdn0Xnf9HFpLcCHVO0/taaV+nGKulfsgndQ7tacwHmWSP3VEZ9s+AEbymE+nqMGhoH44NefkK5/Uff2H3QGH0xYMHsgNGjh0tTAXb24u0J9r4+mrVaOeHTF8xX8Bu7MGMXu3Ny5cfu5eK0D/E/cFm928UeQdrDUmHQkGxjnlH/R+4vrH4a9yq9jveYbGn7DaCV2Zc=)
+
+[点击查看SOLID-JS响应粒度](https://playground.solidjs.com/anonymous/99d58f5d-1b19-4805-a4c5-ef10f4ac31ce)
+
+</v-clicks>
+
+<v-click>
+
+[深入响应式系统](https://cn.vuejs.org/guide/extras/reactivity-in-depth#connection-to-signals)
+</v-click>
+
 
 <!--
 The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
