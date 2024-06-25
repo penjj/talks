@@ -8,6 +8,13 @@ drawings:
   persist: false
 transition: slide-left
 mdc: true
+fonts:
+  # basically the text
+  sans: Robot
+  # use with `font-serif` css class from UnoCSS
+  serif: Robot Slab
+  # for code blocks, inline code, etc.
+  mono: Fira Code
 ---
 # VUE响应式原理及实现
 
@@ -19,9 +26,13 @@ mdc: true
 ---
 layout: two-cols
 ---
+<div mr8>
+
 # 什么是响应式编程？
 
-<img v-click mt-10 w-80 src="/reactivity-spreadsheet.gif"/>
+<SpreadSheet />
+
+</div>
 
 ::right::
 
@@ -30,6 +41,7 @@ layout: two-cols
 # VUE响应性原理是什么？
 
 <div mt8>
+
 - 基于发布订阅模式实现的 vue2
 ```mermaid
 graph LR
@@ -41,6 +53,7 @@ graph LR
 </div>
 
 <div mt8>
+
 - 基于观察者模式实现的 vue3
 ```mermaid
 graph LR
@@ -109,82 +122,66 @@ const Counter = () => {
 
 </v-click>
 
----
-
-# 为什么需要虚拟DOM？
-
-<v-click>
-
-- 减少操作DOM，操作DOM性能代价极其昂贵
-- 用来进行Diff，准确的找到需要更新的节点
-
-</v-click>
-
+::footer::
 <v-clicks>
 
-<br>
-<br>
+# Signal (信号)
+**在访问时跟踪依赖，在依赖变更时能在特定容器里触发副作用**
 
-# 什么是 Signal (信号)
-定义：在访问时跟踪依赖，在依赖变更时能在特定容器里触发副作用。
-
-
-[点击查看VUE响应粒度](https://play.vuejs.org/#eNp9ks1uwjAQhF/F8iUgUFDSnlBA/RGH9tBWbY++0LCkBse27DVFivLutZ0CaVW4rWfG3+5abuit1unOAZ3SwpaGayQW0Ok5k7zWyiBpiIE1acnaqJokPpowyWSppEVSKicxI7MQGWTDX3Lek4tJx/ZUf0CotVgi+BMhxYdDVJLclIKX2xmjP8zRiNF5rEk2JU1z6NW2sZZWCUiFqgaJAbkCkyVD7xWTDncBnffR+Qmdn0Xnf9HFpLcCHVO0/taaV+nGKulfsgndQ7tacwHmWSP3VEZ9s+AEbymE+nqMGhoH44NefkK5/Uff2H3QGH0xYMHsgNGjh0tTAXb24u0J9r4+mrVaOeHTF8xX8Bu7MGMXu3Ny5cfu5eK0D/E/cFm928UeQdrDUmHQkGxjnlH/R+4vrH4a9yq9jveYbGn7DaCV2Zc=)
-
-[点击查看SOLID-JS响应粒度](https://playground.solidjs.com/anonymous/99d58f5d-1b19-4805-a4c5-ef10f4ac31ce)
+[深入了解响应式系统](https://cn.vuejs.org/guide/extras/reactivity-in-depth#connection-to-signals)
 
 </v-clicks>
-
-<v-click>
-
-[深入响应式系统](https://cn.vuejs.org/guide/extras/reactivity-in-depth#connection-to-signals)
-</v-click>
-
 
 <!--
 The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
 -->
 
 ---
+layout: three-cols-footer
 transition: fade-out
 ---
+#### effect
 
-# What is Slidev?
+<<< @/snippets/reactivity.ts#effect ts
 
-Slidev is a slides maker and presenter designed for developers, consist of the following features
 
-- 📝 **Text-based** - focus on the content with Markdown, and then style them later
-- 🎨 **Themable** - themes can be shared and re-used as npm packages
-- 🧑‍💻 **Developer Friendly** - code highlighting, live coding with autocompletion
-- 🤹 **Interactive** - embed Vue components to enhance your expressions
-- 🎥 **Recording** - built-in recording and camera view
-- 📤 **Portable** - export to PDF, PPTX, PNGs, or even a hostable SPA
-- 🛠 **Hackable** - virtually anything that's possible on a webpage is possible in Slidev
-<br>
-<br>
+::center::
+#### reactive
 
-Read more about [Why Slidev?](https://sli.dev/guide/why)
+<<< @/snippets/reactivity.ts#reactive ts
 
-<!--
-You can have `style` tag in markdown to override the style for the current page.
-Learn more: https://sli.dev/guide/syntax#embedded-styles
--->
 
-<style>
-h1 {
-  background-color: #2B90B6;
-  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
-  background-size: 100%;
-  -webkit-background-clip: text;
-  -moz-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-text-fill-color: transparent;
-}
+::right::
+#### track & trigger
+
+<<< @/snippets/reactivity.ts#track ts
+
+::footer::
+
+```ts {monaco-run}
+import { effect, reactive } from './reactivity'
+
+const state = reactive({ count: 1 })
+
+effect(() => {
+  console.log(state.count)
+})
+
+state.count++
+```
+
+<style scoped>
+  .slidev-code {
+    font-size: 10px !important;
+    line-height: 13px !important;
+  }
 </style>
 
-<!--
-Here is another comment.
--->
+<!-- 
+先阐述响应式内部原理，effect 和  reactive 的关联，并引导出关联的 track 和 trigger 
+
+通过动画流程来演示效果
+ -->
 
 ---
 transition: slide-up

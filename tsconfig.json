@@ -1,3 +1,6 @@
 {
-  "extends": "@penjj/tsconfig/tsconfig.json"
+  "extends": "@penjj/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "Dom", "DOM.Iterable"],
+  }
 }
