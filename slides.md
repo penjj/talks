@@ -45,10 +45,10 @@ layout: two-cols
 - 基于发布订阅模式实现的 vue2
 ```mermaid
 graph LR
-    B[订阅者（虚拟DOM）]
-    B-->|订阅消息| C[调度中心（调度器）]
+    B[订阅者（vm.VDOM）]
+    B-->|订阅消息| C[调度中心（vm）]
     C-->|通知订阅者| B
-    D[发布者（组件实例vm）]-->|发布事件| C;
+    D[发布者（vm.Data）]-->|发布事件| C;
 ```
 </div>
 
@@ -88,7 +88,7 @@ level: 2
 
 # VUE最小响应式单元
 
-```ts {monaco-run}
+```ts {monaco-run}{autorun:false}
 import { ref, effect } from 'vue'
 
 const state = ref(1)
@@ -140,35 +140,39 @@ The last comment block of each slide will be treated as slide notes. It will be 
 layout: three-cols-footer
 transition: fade-out
 ---
-#### effect
 
-<<< @/snippets/reactivity.ts#effect ts
+# 简易响应式系统实现
 
-
-::center::
-#### reactive
-
-<<< @/snippets/reactivity.ts#reactive ts
-
-
-::right::
-#### track & trigger
-
-<<< @/snippets/reactivity.ts#track ts
-
-::footer::
-
-```ts {monaco-run}
+```ts {monaco-run} {autorun:false}
 import { effect, reactive } from './reactivity'
 
 const state = reactive({ count: 1 })
 
 effect(() => {
-  console.log(state.count)
+  console.log('Run effect: ' + state.count)
 })
 
 state.count++
 ```
+
+::left::
+<div v-click="1">
+
+<<< @/snippets/reactivity.ts#effect ts {all|4-6|all}{lines:true}
+</div>
+
+::center::
+
+<div v-click="3">
+<<< @/snippets/reactivity.ts#reactive ts {all|3-7|8-11|all}{lines:true}
+</div>
+
+
+
+::right::
+<div v-click="6">
+<<< @/snippets/reactivity.ts#track ts {all|5-8|9-12|13|3-14|17-24|22-24|all}{lines:true}
+</div>
 
 <style scoped>
   .slidev-code {
@@ -182,6 +186,61 @@ state.count++
 
 通过动画流程来演示效果
  -->
+
+
+
+---
+layout: two-cols-header
+---
+
+# WeakMap 和 Map 区别
+
+::left::
+
+<div mr8>
+
+## Map
+```js {monaco-run}{autorun: false}
+const map = new Map()
+
+let obj = {}
+map.set(obj, 'map')
+
+console.log("回收前Map键数: " + map.size)
+
+obj = null
+
+console.log("回收后Map键数: " + map.size)
+```
+</div>
+
+::right::
+<div v-click>
+
+## WeakMap
+```js {monaco-run}{autorun: false}
+const map = new WeakMap()
+
+let obj = {}
+
+
+map.set(obj, 'weakmap')
+
+console.log(map)
+
+obj = null
+
+setTimeout(() => {
+  console.log(map)
+}, 6500)
+```
+</div>
+
+<style scoped>
+  .col-header {
+    height: 100px !important;
+  }
+</style>
 
 ---
 transition: slide-up
