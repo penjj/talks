@@ -137,11 +137,13 @@ The last comment block of each slide will be treated as slide notes. It will be 
 -->
 
 ---
-layout: three-cols-footer
+layout: three-cols-header
 transition: fade-out
 ---
 
-# 简易响应式系统实现
+# 简易响应式系统
+
+::main::
 
 ```ts {monaco-run} {autorun:false}
 import { effect, reactive } from './reactivity'
@@ -157,8 +159,7 @@ state.count++
 
 ::left::
 <div v-click="1">
-
-<<< @/snippets/reactivity.ts#effect ts {all|4-6|all}{lines:true}
+<<< @/snippets/reactivity.ts#effect ts {all|all|4-6|all}{lines:true}
 </div>
 
 ::center::
@@ -188,9 +189,9 @@ state.count++
  -->
 
 
-
 ---
-layout: two-cols-header
+layout: two-cols-footer
+transition: slide-up
 ---
 
 # WeakMap 和 Map 区别
@@ -218,7 +219,7 @@ console.log("回收后Map键数: " + map.size)
 <div v-click>
 
 ## WeakMap
-```js {monaco-run}{autorun: false}
+```js
 const map = new WeakMap()
 
 let obj = {}
@@ -239,6 +240,37 @@ setTimeout(() => {
 <style scoped>
   .col-header {
     height: 100px !important;
+  }
+</style>
+
+---
+layout: two-cols-footer
+transition: fade-in
+---
+
+# 分支切换问题
+
+::left::
+<div v-if=" $clicks === 1">
+<<< @/snippets/branch.ts ts {monaco-run}{autorun:false}
+</div>
+
+<div v-else>
+<<< @/snippets/branch.ts ts {all|3,6,9}
+</div>
+
+::right::
+<v-clicks>
+
+1. 初始化响应式数据源时分支未激活，导致部分依赖错过收集期
+2. 当一个分支暂时失焦时，没有清理该分支内数据源 
+
+</v-clicks>
+
+<style scoped>
+  .slidev-code {
+    padding: 13px 18px !important;
+    font-size: 11.5px !important;
   }
 </style>
 
