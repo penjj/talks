@@ -10,7 +10,7 @@ export function effect(fn) {
 
 
 // #region track
-const targetMap = new WeakMap()
+export const targetMap = new WeakMap()
 
 function track(target, key) {
   if (!activeEffect) return
